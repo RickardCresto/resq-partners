@@ -1,0 +1,317 @@
+<!-- PARTNER DIRECTORY — HubSpot CMS Embed -->
+<!-- Paste this entire block into a HubSpot Custom HTML module -->
+<style>
+  #pd-root {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    max-width: 1100px;
+    margin: 0 auto;
+    color: #1a1a2e;
+  }
+  #pd-root * { box-sizing: border-box; }
+
+  .pd-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    align-items: center;
+  }
+  .pd-search {
+    flex: 1 1 260px;
+    padding: 10px 16px;
+    border: 2px solid #e0e4ef;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .pd-search:focus { border-color: #0057b8; }
+  .pd-filter {
+    padding: 10px 14px;
+    border: 2px solid #e0e4ef;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+    cursor: pointer;
+    min-width: 170px;
+  }
+  .pd-count {
+    font-size: 13px;
+    color: #6b7280;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .pd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+  }
+  .pd-card {
+    background: #fff;
+    border: 1.5px solid #e8ecf4;
+    border-radius: 12px;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: box-shadow .18s, border-color .18s, transform .15s;
+    position: relative;
+  }
+  .pd-card:hover {
+    box-shadow: 0 4px 18px rgba(0,87,184,.10);
+    border-color: #0057b8;
+    transform: translateY(-2px);
+  }
+  .pd-flag {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 22px;
+    line-height: 1;
+  }
+  .pd-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0d1b3e;
+    padding-right: 36px;
+    line-height: 1.3;
+  }
+  .pd-address {
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.45;
+  }
+  .pd-country-tag {
+    display: inline-block;
+    background: #eef3fb;
+    color: #0057b8;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-top: 4px;
+    width: fit-content;
+  }
+  .pd-website {
+    margin-top: auto;
+    padding-top: 10px;
+  }
+  .pd-website a {
+    font-size: 12.5px;
+    color: #0057b8;
+    text-decoration: none;
+    word-break: break-all;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .pd-website a:hover { text-decoration: underline; }
+  .pd-website a::before {
+    content: '→';
+    font-size: 13px;
+  }
+  .pd-no-web {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: auto;
+    padding-top: 10px;
+  }
+
+  .pd-empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: #6b7280;
+    font-size: 15px;
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 600px) {
+    .pd-grid { grid-template-columns: 1fr; }
+    .pd-controls { flex-direction: column; }
+    .pd-count { margin-left: 0; }
+  }
+</style>
+
+<div id="pd-root">
+  <div class="pd-controls">
+    <input class="pd-search" id="pdSearch" type="text" placeholder="Search by name, city or address…" oninput="pdRender()" />
+    <select class="pd-filter" id="pdCountry" onchange="pdRender()">
+      <option value="">All countries</option>
+    </select>
+    <span class="pd-count" id="pdCount"></span>
+  </div>
+  <div class="pd-grid" id="pdGrid"></div>
+</div>
+
+<script>
+(function(){
+  var FLAGS = {
+    "SE":"🇸🇪","NO":"🇳🇴","DK":"🇩🇰","FI":"🇫🇮","GB":"🇬🇧","DE":"🇩🇪","NL":"🇳🇱","BE":"🇧🇪",
+    "FR":"🇫🇷","ES":"🇪🇸","IT":"🇮🇹","PT":"🇵🇹","PL":"🇵🇱","RO":"🇷🇴","BG":"🇧🇬","EE":"🇪🇪",
+    "LV":"🇱🇻","LT":"🇱🇹","SK":"🇸🇰","MK":"🇲🇰","US":"🇺🇸","CA":"🇨🇦","AU":"🇦🇺","NZ":"🇳🇿",
+    "ZA":"🇿🇦","BR":"🇧🇷","AR":"🇦🇷","CL":"🇨🇱","CR":"🇨🇷","IN":"🇮🇳","CN":"🇨🇳","TW":"🇹🇼",
+    "TH":"🇹🇭","VN":"🇻🇳","IS":"🇮🇸"
+  };
+
+  var DATA = [
+    {n:"A-1 Safety UK",a:"C1, Ledston Luck Enterprise Park, Kippax",c:"Leeds",co:"United Kingdom",cc:"GB",w:""},
+    {n:"Abaris International Ltd",a:"Unit 5 Herbert Brown House, 50-52 Whiteley Street",c:"Huddersfield",co:"United Kingdom",cc:"GB",w:"https://www.abaris.co.uk"},
+    {n:"Able Safety Solutions Ltd",a:"Unit 4.15 Tameside Business Park, Windmill Lane, Denton",c:"Manchester",co:"United Kingdom",cc:"GB",w:""},
+    {n:"Abtech Safety Ltd",a:"The Stone Barn",c:"Raglan, Wales",co:"United Kingdom",cc:"GB",w:"http://www.abtechsafety.com/"},
+    {n:"Ahlsell Danmark A/S",a:"Håndværkervej 14",c:"Aalborg",co:"Denmark",cc:"DK",w:"https://www.ahlsell.dk/da"},
+    {n:"Alimak Australia",a:"2 Ausco Pl",c:"Dandenong South",co:"Australia",cc:"AU",w:"https://alimak.com/au"},
+    {n:"ALOTECH",a:"5 Rue Fulgence Bienvenüe",c:"Ploemeur",co:"France",cc:"FR",w:"http://www.alotech.fr/en/"},
+    {n:"Alto Sur SRL",a:"La Esmeralda 1645",c:"Cipolletti",co:"Argentina",cc:"AR",w:"https://altosurinternational.com/en/index.html"},
+    {n:"AMU-Vest",a:"Spangsbjerg Møllevej 304-306",c:"Esbjerg",co:"Denmark",cc:"DK",w:"https://www.amu-vest.dk/"},
+    {n:"Anemos France SRL",a:"58 Av. de Stalingrad",c:"Dijon",co:"France",cc:"FR",w:"https://www.anemosfrance.com"},
+    {n:"AAK Safety AB",a:"Tegelvägen 9",c:"Heby",co:"Sweden",cc:"SE",w:"https://www.aaksafety.se"},
+    {n:"AAK Safety AS",a:"6300 Åndalsnes",c:"Åndalsnes",co:"Norway",cc:"NO",w:"https://www.aaksafety.no/"},
+    {n:"100 Procent Proffs",a:"Bärbogränd 3 / Staffans väg 5",c:"Stockholm",co:"Sweden",cc:"SE",w:"https://100procentproffs.se/"},
+    {n:"Abseil Solutions Ltd",a:"230 The Boulevard",c:"Papamoa",co:"New Zealand",cc:"NZ",w:""},
+    {n:"Adventure Vietnam Co. Ltd",a:"",c:"",co:"Vietnam",cc:"VN",w:"https://maohiem.vn"},
+    {n:"ARCH - Access Rescue Consulting at Height",a:"Lackaghboy Industrial Estate, Enniskillen",c:"Co. Fermanagh",co:"United Kingdom",cc:"GB",w:"https://www.archsafety.com/"},
+    {n:"Barton Industrial Services Ltd",a:"",c:"",co:"United Kingdom",cc:"GB",w:"http://barton-industrial.com/"},
+    {n:"Belay Rope Access Ltd",a:"East Quay",c:"Eastbourne",co:"United Kingdom",cc:"GB",w:"https://belayropeaccess.co.uk/"},
+    {n:"BJ Specialuddannelse & Service ApS",a:"Lendemark Hovedgade 22",c:"Stege",co:"Denmark",cc:"DK",w:"https://www.specialuddannelse.dk/"},
+    {n:"BMS i Hässleholm AB",a:"Väpnaregatan 25",c:"Hässleholm",co:"Sweden",cc:"SE",w:"https://bmsproffsbutik.se/"},
+    {n:"Bröderna Wijklunds Järnhandel AB",a:"Murarevägen 57",c:"Skogstorp",co:"Sweden",cc:"SE",w:"http://www.wijklundsjarn.se/"},
+    {n:"Bygghemma",a:"Hans Michelsensgatan 9",c:"Malmö",co:"Sweden",cc:"SE",w:"https://www.bygghemma.se/varumarken/cresto/"},
+    {n:"Camp Technical Solutions S.R.L.",a:"Strada Macului Nr. 25 D",c:"Oradea",co:"Romania",cc:"RO",w:"https://www.camptechnical.ro/"},
+    {n:"ChileMontana",a:"Carlos XII 120, local E",c:"Las Condes, Santiago",co:"Chile",cc:"CL",w:"https://www.chilemontana.cl/"},
+    {n:"Comtec International Carl Backs A/S",a:"Fiskebrogade 19",c:"Esbjerg",co:"Denmark",cc:"DK",w:"https://www.ccbsafety.com/"},
+    {n:"Comtec International Carl Backs A/S",a:"Unit B2, Chamberlain Road",c:"Hull",co:"United Kingdom",cc:"GB",w:"https://www.ccbsafety.com/"},
+    {n:"Conapro",a:"Calle I, Pol. Ind. Mutilva Baja",c:"Mutilva Baja",co:"Spain",cc:"ES",w:"https://conaprosl.com/"},
+    {n:"Cresto Safety",a:"Partizánska cesta 89",c:"Banská Bystrica",co:"Slovakia",cc:"SK",w:""},
+    {n:"Cresto Safety",a:"Diabasgatan 16",c:"Helsingborg",co:"Sweden",cc:"SE",w:""},
+    {n:"Derome",a:"Multiple locations across western Sweden",c:"",co:"Sweden",cc:"SE",w:"https://www.derome.se/"},
+    {n:"EGE Evolution Green Energy",a:"ul. Patriarh Evtimij 4",c:"Kavarna",co:"Bulgaria",cc:"BG",w:"https://ege-windturbines.com/en/"},
+    {n:"EGE Evolution Green Energy - Axios Group",a:"str.1552 bb, Vizbegovo 1000",c:"Skopje",co:"North Macedonia",cc:"MK",w:"https://ege-windturbines.com/en/"},
+    {n:"ENSA North America",a:"727 E Veterans Way",c:"Mukwonago, WI",co:"United States",cc:"US",w:"https://ensa.myabsorb.com/"},
+    {n:"Ensto Nor AS",a:"Professor Birkelands vei 26A",c:"Oslo",co:"Norway",cc:"NO",w:"https://www.ensto.com/"},
+    {n:"Entrémattan AB",a:"Prästgatan 50",c:"Jämtbo",co:"Sweden",cc:"SE",w:"https://entremattan.se/"},
+    {n:"EPI Maintenance",a:"2 Rue de Vitruve",c:"Villebon-sur-Yvette",co:"France",cc:"FR",w:"https://www.epi-maintenance.fr/"},
+    {n:"EYOLF Inc.",a:"191 Gregson Ct",c:"Fergus, ON",co:"Canada",cc:"CA",w:"https://eyolf.ca/"},
+    {n:"Ferro Zink",a:"Árstígur 6",c:"Akureyri",co:"Iceland",cc:"IS",w:"http://www.ferrozink.is/"},
+    {n:"FormUp",a:"Via Setta",c:"Ziano di Sotto",co:"Italy",cc:"IT",w:"https://www.formup.it/"},
+    {n:"GKW Yrkeskläder AB",a:"Elektravägen 29",c:"Stockholm",co:"Sweden",cc:"SE",w:"https://gkw.se/index.php"},
+    {n:"GR Wind Academy Portugal",a:"R. do Bairro 227",c:"Aveleda",co:"Portugal",cc:"PT",w:"https://gracademy.pt/"},
+    {n:"Global Wind Academy ApS",a:"Sydkajen 10",c:"Struer",co:"Denmark",cc:"DK",w:"https://www.globalwindacademy.com/"},
+    {n:"ICM A/S",a:"Petersmindevej 15",c:"Odense",co:"Denmark",cc:"DK",w:"https://www.icmsafety.com/"},
+    {n:"IMA - Company Line AB",a:"Industrivägen 23",c:"Kiruna",co:"Sweden",cc:"SE",w:"https://ima.companyline.se/hem/"},
+    {n:"IMAB",a:"Multiple locations (Helsingborg, Halmstad)",c:"",co:"Sweden",cc:"SE",w:"https://www.imab.se/"},
+    {n:"Industrieel Klimmen BV",a:"Vrijheidweg 35",c:"Wormerveer",co:"Netherlands",cc:"NL",w:"https://www.industrieelklimmen.nl/"},
+    {n:"Innoen Company Limited",a:"555 On Nut Rd",c:"Bangkok",co:"Thailand",cc:"TH",w:"https://www.gaapinno.net"},
+    {n:"Järn AB Södertorg",a:"Byrumsgatan 4",c:"Visby",co:"Sweden",cc:"SE",w:"https://www.jabs.se/"},
+    {n:"Järnartiklar AB",a:"Marieholmsgatan 11",c:"Gothenburg",co:"Sweden",cc:"SE",w:"https://www.jarnartiklar.se/"},
+    {n:"JOVAB",a:"Birger Svenssons väg 24",c:"Skene",co:"Sweden",cc:"SE",w:"https://foretag.skenejarn.se/"},
+    {n:"K2 Profshop - BHM BVBA",a:"Cleydaellaan 10/8",c:"Aartselaar",co:"Belgium",cc:"BE",w:"https://www.k2profshop.be/en"},
+    {n:"Kang Hwa Safety Supply Company",a:"No. 1",c:"Kaohsiung City",co:"Taiwan",cc:"TW",w:"http://www.kstc.com.tw/en/"},
+    {n:"Klätterservice",a:"Mediavägen 16",c:"Stockholm",co:"Sweden",cc:"SE",w:"https://klatterservice.se/"},
+    {n:"Laitis Handels AB",a:"Multiple locations",c:"Northern Sweden",co:"Sweden",cc:"SE",w:"https://laitis.se/"},
+    {n:"Luna Group Estonia AS",a:"Kadaka tee 131-1",c:"Tallinn",co:"Estonia",cc:"EE",w:"https://luna.ee/"},
+    {n:"Maersk Training Denmark A/S",a:"Ravnevej 12",c:"Esbjerg",co:"Denmark",cc:"DK",w:"https://www.maersktraining.com/"},
+    {n:"Martec",a:"Kragholmen 180",c:"Frederikshavn",co:"Denmark",cc:"DK",w:"https://www.martec.dk/"},
+    {n:"Mercus Yrkeskläder",a:"Multiple locations",c:"Sweden",co:"Sweden",cc:"SE",w:"https://www.mercus.se/"},
+    {n:"Norrmark",a:"Hägerstensvägen 235 C",c:"Stockholm",co:"Sweden",cc:"SE",w:"https://www.norrmark.se/"},
+    {n:"Olander Sjöstrand Fsg AB",a:"Kalkbruksgatan 1",c:"Gothenburg",co:"Sweden",cc:"SE",w:"https://olandershipstore.com/"},
+    {n:"OnRope Portugal",a:"R. de Justino Teixeira 601",c:"Porto",co:"Portugal",cc:"PT",w:"https://www.onrope.pt/"},
+    {n:"Optimum Services & Solutions",a:"",c:"Bucharest",co:"Romania",cc:"RO",w:"http://www.optimum-solutions.ro/"},
+    {n:"OTI ROMA S.R.L.",a:"Via Paolo Orsi",c:"Roma",co:"Italy",cc:"IT",w:"https://otigroup.it/"},
+    {n:"Outreach Rescue Ltd",a:"Tan-y-Bwlch Centre",c:"Llanllechid, Bangor, North Wales",co:"United Kingdom",cc:"GB",w:"https://www.outreachrescue.com/"},
+    {n:"Österbergs Industrihandel AB",a:"Stormgatan 2",c:"Karlstad",co:"Sweden",cc:"SE",w:"https://www.osterbergs.nu/"},
+    {n:"PLD Safe",a:"Rua de Montezelos 35",c:"Vila Real",co:"Portugal",cc:"PT",w:"https://www.pldsafe.com/"},
+    {n:"Profil & Souvenir i Sverige AB",a:"Multiple locations (Stockholm area)",c:"",co:"Sweden",cc:"SE",w:"https://www.pss.se/"},
+    {n:"Profixt Ltd",a:"Boulevard Botevgradsko Shose 234",c:"Sofia",co:"Bulgaria",cc:"BG",w:"https://profixt.com"},
+    {n:"Prolians - Baurès",a:"Multiple locations",c:"Southern France",co:"France",cc:"FR",w:"https://www.prolians.fr/"},
+    {n:"RELYONNNUTEC Poland",a:"Jabłoniowa 64",c:"Gdańsk",co:"Poland",cc:"PL",w:"https://relyonnutec.com/locations/poland/gdansk/"},
+    {n:"RelyOnNutec",a:"Uglviggårdsvej 3",c:"Esbjerg",co:"Denmark",cc:"DK",w:"https://relyonnutec.com/"},
+    {n:"SAB Elteknik",a:"Multiple locations",c:"Sweden",co:"Sweden",cc:"SE",w:"https://www.sabp.se/"},
+    {n:"SAFETYPACK",a:"11 rue du Martin Pêcheur",c:"Schiltigheim",co:"France",cc:"FR",w:"https://safetypack.fr/"},
+    {n:"SafetyPro",a:"Denariusstraat 25",c:"Oosterhout",co:"Netherlands",cc:"NL",w:"https://www.safetypro.nl"},
+    {n:"Safety Technology USA Inc.",a:"126 S Mockingbird Ln",c:"Abilene, TX",co:"United States",cc:"US",w:"https://safetytechnologyusa.com/"},
+    {n:"SB Værktøj A/S",a:"Katmosevej 18",c:"Viborg",co:"Denmark",cc:"DK",w:"https://www.sbnet.dk/"},
+    {n:"SBL Solutions Pty Ltd",a:"770 Old Princes Hwy",c:"Sutherland, NSW",co:"Australia",cc:"AU",w:"https://sblsolutions.com.au/"},
+    {n:"SEGIN Ropa Técnica y Epp",a:"Av. José Alcalde Délano 10581, Lo Barnechea",c:"Santiago",co:"Chile",cc:"CL",w:"https://segin.cl/"},
+    {n:"Segurycel-Gasset",a:"Av. Ejército Libertador 740",c:"Santiago",co:"Chile",cc:"CL",w:"https://www.segurycel.cl"},
+    {n:"Sela Safety Dexis",a:"Poligono Industrial de Sabon",c:"Arteijo",co:"Spain",cc:"ES",w:"https://www.sela.es"},
+    {n:"SHE Solution Bermann GmbH",a:"Im Sundernkamp 2",c:"Enger",co:"Germany",cc:"DE",w:"https://she-solution.de"},
+    {n:"Shanghai BTC Safety Products Co. Ltd",a:"Tong Pu Lu",c:"Shanghai",co:"China",cc:"CN",w:"http://www.btcsafe.com.cn/en/index.aspx"},
+    {n:"Sjöbo Järn",a:"Verkstadsgatan 36",c:"Sjöbo",co:"Sweden",cc:"SE",w:"https://sjobojarn.se/"},
+    {n:"Skydda i Sverige AB",a:"Vistaforsvägen 3",c:"Borås area",co:"Sweden",cc:"SE",w:"https://skydda.se/"},
+    {n:"Skydda Store",a:"Multiple locations (Helsinki, Lahti, Tampere)",c:"",co:"Finland",cc:"FI",w:"https://site.skydda.fi/"},
+    {n:"Soluciones Floruma",a:"Carretera Panamericana s/n",c:"Pozos, San José",co:"Costa Rica",cc:"CR",w:"http://www.solucionesfloruma.com"},
+    {n:"Soluções Outdoor",a:"Rua da Ribeira 4",c:"Vila Real",co:"Portugal",cc:"PT",w:"https://www.solucoesoutdoor.com/"},
+    {n:"SpanSet Australia Ltd",a:"150 Old Bathurst Rd",c:"Emu Plains, NSW",co:"Australia",cc:"AU",w:"https://www.spanset.com/au-en"},
+    {n:"Spares in Motion B.V.",a:"Melbournestraat 55",c:"Rotterdam",co:"Netherlands",cc:"NL",w:"https://www.sparesinmotion.com/"},
+    {n:"SP-Wind",a:"Unit 20, Greenbushes Industrial Park",c:"Port Elizabeth",co:"South Africa",cc:"ZA",w:"https://www.sp-wind.com/"},
+    {n:"Storz Servicos Tecnicos Ltda",a:"R. Castro Alves",c:"Fortaleza",co:"Brazil",cc:"BR",w:"https://grupostorz.com"},
+    {n:"Svea Skydd",a:"Multiple locations (Eskilstuna, Västerås)",c:"",co:"Sweden",cc:"SE",w:"https://sveaskydd.se/"},
+    {n:"SWEDOL",a:"Multiple locations across Sweden",c:"",co:"Sweden",cc:"SE",w:"https://www.swedol.se/"},
+    {n:"SWAT Academy",a:"Bremen / Rostock / Sassnitz / Dublin",c:"",co:"Germany",cc:"DE",w:"https://gwo-trainings.com/"},
+    {n:"Tesicnor S.L.",a:"Calle Rio Elorz 13E",c:"Noain",co:"Spain",cc:"ES",w:"https://www.tesicnor.com/en/"},
+    {n:"TOOLS (Finland)",a:"Multiple locations across Finland",c:"",co:"Finland",cc:"FI",w:"https://www.tools.fi/"},
+    {n:"TOOLS (Norway)",a:"Multiple locations across Norway",c:"",co:"Norway",cc:"NO",w:"https://www.tools.no/"},
+    {n:"Udyogi",a:"",c:"Kolkata",co:"India",cc:"IN",w:"http://www.udyogisafety.com/"},
+    {n:"Vallin SIA",a:"Riga / Vilnius",c:"",co:"Latvia",cc:"LV",w:"https://vallin.lv/"},
+    {n:"Wertykal",a:"Łąkowa 1",c:"Zabierzów",co:"Poland",cc:"PL",w:"https://wertykal.pl/"},
+    {n:"WFE Safety",a:"Station Goods Yard",c:"Mostyn",co:"United Kingdom",cc:"GB",w:"https://www.wfesafety.com/"},
+    {n:"Wiedenmann Seile GmbH",a:"Multiple locations across Germany",c:"",co:"Germany",cc:"DE",w:"https://www.wiedenmannseile.de/de/home/"},
+    {n:"Wind Power Energy SRL",a:"Bulevardul Tomis 480",c:"Constanța",co:"Romania",cc:"RO",w:"https://www.gwo-training.eu"},
+    {n:"Windhunter Academy",a:"Morska 18A",c:"Koszalin",co:"Poland",cc:"PL",w:"https://windhunteracademy.com/"},
+    {n:"Zitras GmbH",a:"Lessingstraße 84/haus 25c",c:"Berlin",co:"Germany",cc:"DE",w:"https://www.zitras.com/"}
+  ];
+
+  // Sort alphabetically by name
+  DATA.sort(function(a,b){ return a.n.localeCompare(b.n); });
+
+  // Populate country dropdown
+  var countries = {};
+  DATA.forEach(function(d){ countries[d.co] = true; });
+  var sorted = Object.keys(countries).sort();
+  var sel = document.getElementById('pdCountry');
+  sorted.forEach(function(c){
+    var o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  });
+
+  function esc(str){ return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  window.pdRender = function(){
+    var q = document.getElementById('pdSearch').value.toLowerCase();
+    var cf = document.getElementById('pdCountry').value;
+    var grid = document.getElementById('pdGrid');
+    var filtered = DATA.filter(function(d){
+      var match = !q || (d.n+' '+d.a+' '+d.c+' '+d.co).toLowerCase().indexOf(q) > -1;
+      var cMatch = !cf || d.co === cf;
+      return match && cMatch;
+    });
+
+    document.getElementById('pdCount').textContent = filtered.length + ' partner' + (filtered.length !== 1 ? 's' : '');
+
+    if(!filtered.length){
+      grid.innerHTML = '<div class="pd-empty">No partners found for this search.</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(function(d){
+      var flag = FLAGS[d.cc] || '';
+      var addrLine = [d.a, d.c].filter(Boolean).join(', ');
+      var webHtml = d.w
+        ? '<div class="pd-website"><a href="' + esc(d.w) + '" target="_blank" rel="noopener">' + esc(d.w.replace(/^https?:\/\//,'').replace(/\/$/,'')) + '</a></div>'
+        : '<div class="pd-no-web">No website listed</div>';
+      return '<div class="pd-card">'
+        + '<span class="pd-flag">' + flag + '</span>'
+        + '<div class="pd-name">' + esc(d.n) + '</div>'
+        + (addrLine ? '<div class="pd-address">' + esc(addrLine) + '</div>' : '')
+        + '<span class="pd-country-tag">' + esc(d.co) + '</span>'
+        + webHtml
+        + '</div>';
+    }).join('');
+  };
+
+  pdRender();
+})();
+</script>
+<!-- END PARTNER DIRECTORY -->
